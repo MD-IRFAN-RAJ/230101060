@@ -74,3 +74,91 @@ Simple cache ideas:
 - Cache first page of notifications for short time.
 - Cache unread count per user.
 - Invalidate cache when a notification is marked as read.
+
+## Why Synchronous Notification Sending Is Slow
+
+- In synchronous flow, the API waits until sending is finished.
+- If sending takes 2-3 seconds, the user waits 2-3 seconds.
+- If provider is slow, API response is also slow.
+
+Pseudocode:
+
+```text
+function createNotification(request):
+	saveToDatabase(request)
+	sendNotification(request)   // API waits here
+	return "done"
+```
+
+## Why Queues Improve Reliability
+
+- Queue stores jobs even if sender is busy.
+- API can respond quickly after putting a job in queue.
+- Temporary failures do not lose notifications.
+
+Pseudocode:
+
+```text
+function createNotification(request):
+	id = saveToDatabase(request)
+	queue.push({ notificationId: id })
+	return "accepted"
+```
+
+## Retry Mechanism Concept
+
+- Sending can fail due to network or provider timeout.
+- Retry tries again a few times before marking failed.
+- This improves delivery success rate.
+
+Pseudocode:
+
+```text
+function processJob(job):
+	maxRetries = 3
+	while job.attempts < maxRetries:
+		ok = trySend(job.notificationId)
+		if ok:
+			markDelivered(job.notificationId)
+			return
+		job.attempts = job.attempts + 1
+	markFailed(job.notificationId)
+```
+
+## Async Processing
+
+- API writes data and returns immediately.
+- Background worker handles sending later.
+- User sees faster API response.
+
+Pseudocode:
+
+```text
+function apiHandler(request):
+	id = saveToDatabase(request)
+	queue.push({ id: id, attempts: 0 })
+	return { status: 202, message: "queued" }
+```
+
+## Worker Based Architecture (Simple)
+
+- One API process accepts requests.
+- One worker process keeps polling queue.
+- Worker sends notifications and updates status.
+
+Pseudocode:
+
+```text
+// API side
+function onCreate(request):
+	id = saveToDatabase(request)
+	queue.push({ id: id, attempts: 0 })
+
+// Worker side
+function workerLoop():
+	while true:
+		job = queue.pop()
+		if job exists:
+			processJob(job)
+		sleep(1 second)
+```
