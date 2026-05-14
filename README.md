@@ -1,30 +1,63 @@
 # Notification System
 
-full-stack notification app.
+Simple full-stack app to manage and view notifications.
 
+## Project Overview
+
+- View all notifications
+- View priority notifications
+- Filter by type
+- Mark notifications as read
+
+## Tech Stack
+
+- Frontend: React, Material UI, Axios, Vite
+- Backend: Node.js, Express
+- Logging: Custom middleware with Axios
+
+## Setup Instructions
+
+1. Open two terminals
+2. Start backend first
+3. Start frontend next
+
+## Backend Setup
+
+```bash
+cd notification_app_be
+npm install
+npm run dev
 ```
-230101060/
-├── logging_middleware/     (Express middleware)
-├── notification_app_be/    (Node + Express backend)
-├── notification_app_fe/    (React + Vite + Material UI frontend)
-├── notification_system_design.md
-└── README.md
+
+Backend runs on: http://localhost:4000
+
+## Frontend Setup
+
+```bash
+cd notification_app_fe
+npm install
+npm run dev
 ```
 
-## Quick Start
+Frontend runs on: http://localhost:5173
 
-1. Backend:
-   ```
-   cd notification_app_be
-   npm install
-   npm start
-   ```
+## Logging Middleware Usage
 
-2. Frontend (new terminal):
-   ```
-   cd notification_app_fe
-   npm install
-   npm run dev
-   ```
+Use Log function:
 
-Open `http://localhost:5173` in browser.
+```js
+import { Log } from '../logging_middleware/logger.js';
+
+Log('file:function', 'INFO', 'be', 'Message here');
+```
+
+## API Endpoints
+
+- GET /api/notifications
+- GET /api/notifications/unread
+- PATCH /api/notifications/:id/read
+- POST /api/notifications
+
+## Screenshots
+
+
