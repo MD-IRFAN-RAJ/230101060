@@ -1,27 +1,76 @@
-# Notification System
+# Notification System Design
 
-Simple notification app with React frontend and Express backend using mock data.
+This project currently uses in-memory data for learning and prototyping.
 
-## Structure
+## Why Notification Systems Need Databases
 
-- Backend: Express server with `/api/notifications` endpoint, returns mock notification data
-- Frontend: React app that fetches and displays notifications with Material UI
-- Logging: Simple Express middleware that logs requests
+- In-memory data is lost when the server restarts.
+- Real apps need persistent history of notifications.
+- Multiple app servers need shared storage to stay consistent.
+- User-specific notifications require querying by user, status, and time.
 
-## Running
+## Why Indexing Improves Performance
 
-Backend:
-```
-cd notification_app_be
-npm install
-npm start
-```
+- A database index is like a book index.
+- Without an index, the database scans every row.
+- With an index, it can jump directly to matching rows.
+- This reduces response time when data grows.
 
-Frontend:
-```
-cd notification_app_fe
-npm install
-npm run dev
-```
+Common useful indexes for notifications:
 
-Visit `http://localhost:5173` after starting both servers.
+- user_id
+- read_status
+- type
+- created_at
+
+## Why SELECT * Is Inefficient
+
+- It fetches all columns, even unused ones.
+- More data transfer means slower queries.
+- It can prevent some query optimizations.
+
+Better approach:
+
+- Select only required columns.
+
+## Simple Optimized Query Examples
+
+Get latest unread notifications for a user:
+
+SELECT id, title, type, created_at
+FROM notifications
+WHERE user_id = ? AND read_status = false
+ORDER BY created_at DESC
+LIMIT 20 OFFSET 0;
+
+Filter by type with pagination:
+
+SELECT id, title, message, created_at
+FROM notifications
+WHERE user_id = ? AND type = ?
+ORDER BY created_at DESC
+LIMIT 10 OFFSET 20;
+
+## Pagination Explanation
+
+- Pagination returns data in small chunks.
+- This avoids loading thousands of rows at once.
+- It improves API speed and frontend rendering.
+- Typical parameters are page and limit.
+
+Example:
+
+- page = 3, limit = 10 means rows 21 to 30.
+
+## Caching Explanation
+
+- Caching stores frequently requested results in fast memory.
+- It reduces repeated database reads.
+- Useful for recent notifications or unread counts.
+- Cache should expire or refresh after updates.
+
+Simple cache ideas:
+
+- Cache first page of notifications for short time.
+- Cache unread count per user.
+- Invalidate cache when a notification is marked as read.
