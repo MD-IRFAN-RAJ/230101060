@@ -1,7 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import logger, { Log } from '../logging_middleware/logger.js';
+import logger, { Log } from './utils/logger.js';
 import notificationsRouter from './routes/notifications.js';
 
 dotenv.config();

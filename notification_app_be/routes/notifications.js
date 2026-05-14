@@ -1,7 +1,7 @@
 import express from 'express';
 import { addNotification } from '../data.js';
 import { getAllNotifs, getUnread, markAsRead } from '../controllers/notificationController.js';
-import { Log } from '../../logging_middleware/logger.js';
+import { Log } from '../utils/logger.js';
 
 const router = express.Router();
 

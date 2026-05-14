@@ -1,5 +1,5 @@
 import { getNotifications, updateNotifRead } from '../data.js';
-import { Log } from '../../logging_middleware/logger.js';
+import { Log } from '../utils/logger.js';
 import { getTopPriorityNotifications } from '../priority.js';
 
 export async function getAllNotifs(req, res) {
