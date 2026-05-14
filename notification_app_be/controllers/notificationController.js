@@ -1,5 +1,6 @@
 import { getNotifications, updateNotifRead } from '../data.js';
 import { Log } from '../../logging_middleware/logger.js';
+import { getTopPriorityNotifications } from '../priority.js';
 
 export async function getAllNotifs(req, res) {
   try {
@@ -7,9 +8,11 @@ export async function getAllNotifs(req, res) {
     let data = getNotifications();
 
     if (type) {
-      data = data.filter(n => n.type === type);
+      data = data.filter(n => String(n.type).toLowerCase() === String(type).toLowerCase());
       Log('ctrl:getAllNotifs', 'INFO', 'be', `Filtered by type: ${type}`);
     }
+
+    data = getTopPriorityNotifications(data, 10);
 
     const start = (page - 1) * limit;
     const paginated = data.slice(start, start + limit);
@@ -30,6 +33,8 @@ export async function getUnread(req, res) {
   try {
     const { page = 1, limit = 10 } = req.query;
     let data = getNotifications().filter(n => !n.read);
+
+    data = getTopPriorityNotifications(data, 10);
 
     const start = (page - 1) * limit;
     const paginated = data.slice(start, start + limit);
