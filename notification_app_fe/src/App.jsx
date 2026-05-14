@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Container, TextField, Button, Box, Typography } from '@mui/material';
 import NotificationList from './components/NotificationList.jsx';
+import { Log } from './utils/logger.js';
+
+const pkg = 'fe';
 
 export default function App() {
   const [notifications, setNotifications] = useState([]);
@@ -14,32 +17,32 @@ export default function App() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('/api/notifications');
-      const data = await response.json();
+      const res = await fetch('/api/notifications');
+      const data = await res.json();
       setNotifications(data);
+      Log('App.jsx:fetch', 'INFO', pkg, `Got ${data.length}`);
     } catch (err) {
-      console.error('Error fetching notifications:', err);
+      Log('App.jsx:fetch', 'ERROR', pkg, err.message);
     }
   };
 
   const handleCreate = async () => {
     if (!title.trim() || !message.trim()) return;
-
     setLoading(true);
     try {
-      const response = await fetch('/api/notifications', {
+      const res = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, message }),
       });
-
-      if (response.ok) {
+      if (res.ok) {
+        Log('App.jsx:create', 'INFO', pkg, `Created: ${title}`);
         setTitle('');
         setMessage('');
         fetchNotifications();
       }
     } catch (err) {
-      console.error('Error creating notification:', err);
+      Log('App.jsx:create', 'ERROR', pkg, err.message);
     } finally {
       setLoading(false);
     }
